@@ -1,53 +1,39 @@
 #include "shared_types.h"
+
+#include <memory>       // ← обов'язково
 #include <vector>
 #include <algorithm>
-
-namespace {
-
-std::vector<Edge> collectEdges(const InputData& data) {
-    std::vector<Edge> edges;
-    for (int u = 0; u < data.vertexCount; ++u) {
-        for (const auto& [v, w] : data.adjacency[u]) {
-            edges.push_back({u, v, w});
-        }
-    }
-    return edges;
-}
-
-std::vector<int> reconstructPath(const std::vector<int>& prev, int source, int destination) {
-    std::vector<int> path;
-    if (prev[destination] == -1 && source != destination) {
-        return path;
-    }
-    for (int v = destination; v != -1; v = prev[v]) {
-        path.push_back(v);
-    }
-    std::reverse(path.begin(), path.end());
-    return path;
-}
-
-} // namespace
+#include <limits>
 
 std::unique_ptr<Result> calculateB(std::shared_ptr<const InputData> data) {
     auto result = std::make_unique<Result>();
-    result->algorithmName = "Bellman-Ford";
+    result->algorithmName = "Алгоритм Беллмана-Форда";
+    result->iterations = 0;
+    result->pathFound = false;
 
-    const int n = data->vertexCount;
+    const int n = data->numVertices;
     const int src = data->source;
     const int dst = data->destination;
+
+    const double INF = std::numeric_limits<double>::infinity();
 
     std::vector<double> dist(n, INF);
     std::vector<int> prev(n, -1);
     dist[src] = 0.0;
 
-    const auto edges = collectEdges(*data);
+    struct RawEdge { int from; int to; double weight; };
+    std::vector<RawEdge> edges;
+    for (int u = 0; u < n; ++u) {
+        for (const auto& e : data->adjacency[u]) {
+            edges.push_back({u, e.to, e.weight});
+        }
+    }
 
-    int iterations = 0;
     bool changed = true;
-
     for (int i = 0; i < n - 1 && changed; ++i) {
         changed = false;
-        ++iterations;
+        ++result->iterations;
+
         for (const auto& e : edges) {
             if (dist[e.from] != INF && dist[e.from] + e.weight < dist[e.to]) {
                 dist[e.to] = dist[e.from] + e.weight;
@@ -57,16 +43,20 @@ std::unique_ptr<Result> calculateB(std::shared_ptr<const InputData> data) {
         }
     }
 
-    result->iterations = iterations;
+    result->distance = dist[dst];
 
     if (dist[dst] == INF) {
         result->pathFound = false;
-        result->pathLength = INF;
         return result;
     }
 
+    std::vector<int> path;
+    for (int v = dst; v != -1; v = prev[v]) {
+        path.push_back(v);
+    }
+    std::reverse(path.begin(), path.end());
+    result->path = std::move(path);
     result->pathFound = true;
-    result->pathLength = dist[dst];
-    result->path = reconstructPath(prev, src, dst);
+
     return result;
 }
