@@ -3,6 +3,7 @@
 #include <chrono>
 #include <iomanip>
 #include <cmath>
+#include <windows.h>
 
 #include "shared_types.h"
 
