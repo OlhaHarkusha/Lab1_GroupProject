@@ -37,6 +37,7 @@ std::shared_ptr<const InputData> createTestGraph() {
     addEdge(2, 5, 7.0);
     addEdge(3, 4, 7.0);
     addEdge(4, 5, 2.0);
+	addEdge(3, 5, 20.0);  // додаткове ребро
 
     return data;
 }
