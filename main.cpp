@@ -27,6 +27,21 @@ std::shared_ptr<const InputData> buildTestGraph() {
     addEdge(3, 4, 6.0);
     addEdge(4, 5, 9.0);
 
+    // Тестовий граф:
+    //   0 --4-- 1 --8-- 2
+    //   |       |       |
+    //   8       11      7
+    //   |       |       |
+    //   3 --7-- 4 --2-- 5
+    addEdge(0, 1, 4.0);
+    addEdge(0, 3, 8.0);
+    addEdge(1, 2, 8.0);
+    addEdge(1, 4, 11.0);
+    addEdge(2, 5, 7.0);
+    addEdge(3, 4, 7.0);
+    addEdge(4, 5, 2.0);
+    addEdge(3, 5, 20.0);  // додаткове ребро
+
     data->source = 0;
     data->destination = 4;
     return data;
